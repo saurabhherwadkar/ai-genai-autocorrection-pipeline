@@ -1,0 +1,54 @@
+[tool.poetry]
+name = "ai-genai-autocorrection-pipeline"
+version = "0.1.0"
+description = "GenAI Auto-Correction Pipeline - captures and corrects low-confidence LLM responses for future model training"
+authors = ["Developer <dev@example.com>"]
+readme = "README.md"
+packages = [{include = "autocorrection_pipeline", from = "src"}]
+
+[tool.poetry.scripts]
+autocorrect = "autocorrection_pipeline.main:cli"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+openai = "^1.82.0"
+anthropic = "^0.52.0"
+numpy = "^2.2.0"
+pyyaml = "^6.0.2"
+python-dotenv = "^1.1.0"
+pydantic = "^2.11.0"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.3.0"
+pytest-asyncio = "^0.26.0"
+pytest-cov = "^6.1.0"
+pytest-mock = "^3.14.0"
+ruff = "^0.11.0"
+mypy = "^1.15.0"
+bandit = "^1.9.0"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+addopts = "--cov=autocorrection_pipeline --cov-report=term-missing --cov-fail-under=90"
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+src = ["src"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "N", "UP", "S", "B", "A", "C4", "SIM"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**/*.py" = ["S101", "E501"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+warn_return_any = true
+warn_unused_configs = true
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

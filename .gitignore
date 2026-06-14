@@ -1,0 +1,68 @@
+# Python bytecode and compiled files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+dist/
+*.egg-info/
+*.egg
+
+# Virtual environments
+.venv/
+venv/
+ENV/
+
+# IDE and editor files
+.idea/
+.vscode/
+*.swp
+*.swo
+*.sublime-project
+*.sublime-workspace
+
+# Environment variables (contains secrets)
+.env
+
+# Log files
+logs/*.log
+*.log
+
+# Output corrections (may contain sensitive data)
+output/*.md
+!output/.gitkeep
+
+# Poetry lock (regenerated per environment)
+poetry.lock
+
+# Testing artifacts
+.coverage
+htmlcov/
+.pytest_cache/
+
+# Type checking cache
+.mypy_cache/
+
+# Ruff cache
+.ruff_cache/
+
+# Operating system files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Distribution and packaging
+*.manifest
+*.spec
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Installer logs
+pip-log.txt
+
+# Unit test / coverage reports
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover

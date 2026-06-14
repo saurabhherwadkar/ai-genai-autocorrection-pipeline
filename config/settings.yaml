@@ -1,0 +1,48 @@
+# =============================================================================
+# Application Settings for AI GenAI Auto-Correction Pipeline
+# =============================================================================
+# This file controls all configurable behavior of the pipeline.
+# Environment-specific values (API keys) are loaded from .env file.
+# =============================================================================
+
+# Application metadata
+app:
+  name: "ai-genai-autocorrection-pipeline"
+  version: "0.1.0"
+
+# LLM provider configuration
+llm:
+  # Active provider: "openai" | "anthropic" | "azure_openai"
+  active_provider: "openai"
+  # Confidence threshold below which corrections are captured (0.0 to 1.0)
+  confidence_threshold: 0.8
+  # Comparison method: "cosine_similarity" | "llm_judge"
+  comparison_method: "cosine_similarity"
+
+# Provider-specific settings (API keys come from environment variables)
+providers:
+  openai:
+    model: "gpt-4o"
+    embedding_model: "text-embedding-3-small"
+    max_tokens: 4096
+    temperature: 0.0
+  anthropic:
+    model: "claude-sonnet-4-20250514"
+    embedding_model: "text-embedding-3-small"
+    max_tokens: 4096
+    temperature: 0.0
+  azure_openai:
+    model: "gpt-4o"
+    embedding_model: "text-embedding-3-small"
+    api_version: "2024-06-01"
+    max_tokens: 4096
+    temperature: 0.0
+
+# File path configuration
+paths:
+  ideal_responses: "config/ideal_responses.json"
+  output_directory: "output"
+
+# Logging level override (also configurable via LOG_LEVEL env var)
+logging:
+  level: "INFO"

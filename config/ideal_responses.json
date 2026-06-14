@@ -1,0 +1,16 @@
+{
+  "queries": [
+    {
+      "query": "What is the capital of France?",
+      "ideal_response": "The capital of France is Paris. It is the largest city in France and serves as the country's political, economic, and cultural center."
+    },
+    {
+      "query": "Explain photosynthesis in simple terms.",
+      "ideal_response": "Photosynthesis is the process by which plants convert sunlight, water, and carbon dioxide into glucose (sugar) and oxygen. It occurs primarily in the leaves using chlorophyll, a green pigment that captures light energy."
+    },
+    {
+      "query": "What is machine learning?",
+      "ideal_response": "Machine learning is a subset of artificial intelligence where computer systems learn and improve from experience without being explicitly programmed. It uses algorithms to identify patterns in data and make predictions or decisions based on those patterns."
+    }
+  ]
+}
