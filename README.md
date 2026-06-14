@@ -247,7 +247,127 @@ The capital of France is Paris. It is the largest city...
 *Captured for model training/correction purposes*
 ```
 
-## Architecture
+## Architecture Diagram
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                    AI GenAI Auto-Correction Pipeline                         │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+                         ┌──────────────────┐
+                         │  poetry run      │
+                         │  autocorrect     │
+                         └────────┬─────────┘
+                                  │
+                                  ▼
+┌──────────────────────────────────────────────────────────────────────┐
+│  BOOTSTRAP                                                           │
+│  ┌─────────────┐   ┌──────────────────┐   ┌──────────────────────┐  │
+│  │ .env        │   │ settings.yaml    │   │ logging.yaml         │  │
+│  │ (API keys)  │──▶│ (config)         │──▶│ (log config)         │  │
+│  └─────────────┘   └──────────────────┘   └──────────────────────┘  │
+│                              │                                        │
+│                              ▼                                        │
+│                     ┌──────────────────┐                             │
+│                     │  AppSettings     │                             │
+│                     │  (immutable)     │                             │
+│                     └────────┬─────────┘                             │
+└──────────────────────────────┼───────────────────────────────────────┘
+                               │
+                               ▼
+┌──────────────────────────────────────────────────────────────────────┐
+│  INITIALIZE PIPELINE                                                 │
+│                                                                      │
+│  ┌────────────────────┐   ┌──────────────────┐  ┌───────────────┐  │
+│  │  ProviderFactory   │   │  Comparator      │  │ Correction    │  │
+│  │  ┌──────────────┐  │   │  ┌────────────┐  │  │ Capture       │  │
+│  │  │ OpenAI       │  │   │  │ Cosine     │  │  │               │  │
+│  │  │ Anthropic    │  │   │  │ Similarity │  │  │ (writes .md   │  │
+│  │  │ Azure OpenAI │  │   │  │ LLM Judge  │  │  │  files)       │  │
+│  │  └──────────────┘  │   │  └────────────┘  │  └───────────────┘  │
+│  └────────────────────┘   └──────────────────┘                      │
+│                                                                      │
+│  ┌─────────────────────────────┐                                    │
+│  │  ideal_responses.json       │                                    │
+│  │  { query → ideal_response } │                                    │
+│  └─────────────────────────────┘                                    │
+└──────────────────────────────┬───────────────────────────────────────┘
+                               │
+                               ▼
+┌──────────────────────────────────────────────────────────────────────┐
+│  BATCH PROCESSING (for each query)                                   │
+│                                                                      │
+│  ┌─────────┐      ┌───────────────┐      ┌──────────────────────┐  │
+│  │  Query  │─────▶│  LLM Provider │─────▶│  Actual Response     │  │
+│  └─────────┘      └───────────────┘      └──────────┬───────────┘  │
+│                                                      │              │
+│                    ┌───────────────┐                  │              │
+│                    │ Ideal Response│◀─ (from JSON)    │              │
+│                    └───────┬───────┘                  │              │
+│                            │                         │              │
+│                            ▼                         ▼              │
+│                   ┌─────────────────────────────────────┐           │
+│                   │         COMPARATOR                   │           │
+│                   │                                     │           │
+│                   │  Strategy A: Cosine Similarity      │           │
+│                   │  ┌────────┐  ┌────────┐            │           │
+│                   │  │Embed(A)│  │Embed(I)│→ cos(θ)    │           │
+│                   │  └────────┘  └────────┘            │           │
+│                   │                                     │           │
+│                   │  Strategy B: LLM Judge              │           │
+│                   │  ┌─────────────────────────┐       │           │
+│                   │  │ LLM evaluates A vs I    │       │           │
+│                   │  │ Returns {score, reason} │       │           │
+│                   │  └─────────────────────────┘       │           │
+│                   └──────────────┬──────────────────────┘           │
+│                                  │                                   │
+│                                  ▼                                   │
+│                   ┌──────────────────────────┐                      │
+│                   │  Confidence Score (0-1)  │                      │
+│                   └────────────┬─────────────┘                      │
+│                                │                                     │
+│                    ┌───────────┴───────────┐                        │
+│                    │                       │                        │
+│              score >= threshold      score < threshold              │
+│                    │                       │                        │
+│                    ▼                       ▼                        │
+│              ┌──────────┐     ┌────────────────────────┐           │
+│              │  PASS    │     │  CORRECTION CAPTURE    │           │
+│              └──────────┘     │  -> Write .md file     │           │
+│                               │     to output/         │           │
+│                               └────────────────────────┘           │
+└──────────────────────────────────────────────────────────────────────┘
+                               │
+                               ▼
+┌──────────────────────────────────────────────────────────────────────┐
+│  REPORT                                                              │
+│  ┌────────────────────────────────────────────────────────────┐     │
+│  │  Summary: Total | Passed | Captured | Pass Rate %          │     │
+│  └────────────────────────────────────────────────────────────┘     │
+└──────────────────────────────────────────────────────────────────────┘
+```
+
+### End-to-End Flow
+
+1. **CLI Entry** (`main.py`): User runs `poetry run autocorrect`. Loads configuration from `config/settings.yaml`, API keys from `.env`, and logging from `config/logging.yaml`. Produces an immutable `AppSettings` dataclass.
+
+2. **Pipeline Initialization** (`orchestrator.py`):
+   - `ProviderFactory` selects the active LLM provider (OpenAI, Anthropic, or Azure OpenAI)
+   - Instantiates the comparator (`CosineSimilarityComparator` or `LLMJudgeComparator`)
+   - Sets up `CorrectionCapture` pointing to the `output/` directory
+   - Loads ground-truth query/response pairs from `config/ideal_responses.json`
+
+3. **Batch Processing** (per query):
+   - **Generate**: Send query to configured LLM provider, get actual response
+   - **Compare**: Evaluate actual vs. ideal using the selected strategy:
+     - *Cosine Similarity*: Embed both responses, compute vector cosine similarity (0.0-1.0)
+     - *LLM Judge*: Ask an LLM to score quality, parse JSON response with score + explanation
+   - **Threshold Check**: If score < `confidence_threshold`, trigger correction capture
+   - **Correction Capture**: Write structured markdown file with query, actual response, ideal response, and comparison metadata
+
+4. **Reporting**: Log summary statistics (total processed, passed, captured, pass rate %) and exit.
+
+### Design Patterns
 
 The project follows these design patterns:
 
