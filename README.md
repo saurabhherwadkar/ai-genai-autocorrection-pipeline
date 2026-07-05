@@ -2,6 +2,19 @@
 
 A Python-based pipeline that captures LLM query-response pairs, compares them against ideal (ground-truth) responses, and automatically generates correction files for responses that fall below a configurable confidence threshold. These correction files are structured for future model training and fine-tuning.
 
+## Key Learning Objectives
+
+- Understand how LLM self-correction pipelines detect and capture low-quality responses using configurable confidence thresholds
+- Implement validation loops that compare generated outputs against ground-truth references to measure response quality
+- Apply the Strategy pattern to swap between comparison methods (cosine similarity vs. LLM-as-judge) without modifying pipeline logic
+- Use the Factory pattern to abstract LLM provider selection, enabling seamless switching between OpenAI, Anthropic, and Azure OpenAI
+- Build structured correction datasets in markdown format suitable for future model fine-tuning and training workflows
+- Design async Python pipelines with clean separation of concerns across configuration, providers, comparison, and correction modules
+- Leverage embedding-based semantic similarity (cosine similarity) to quantify how closely an LLM response matches an ideal answer
+- Implement an LLM-as-judge evaluation pattern where one model scores another model's output with an explanation
+- Apply production-grade practices including immutable configuration, YAML-driven settings, rotating log files, and environment-based secrets management
+- Structure a Python project with Poetry, strict type checking (mypy), linting (ruff), security scanning (bandit), and high test coverage requirements
+
 ## How It Works
 
 1. **Query Processing**: Sends queries to a configured LLM provider (OpenAI, Anthropic, or Azure OpenAI)
