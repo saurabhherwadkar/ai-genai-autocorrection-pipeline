@@ -2,7 +2,7 @@
 
 A Python-based pipeline that captures LLM query-response pairs, compares them against ideal (ground-truth) responses, and automatically generates correction files for responses that fall below a configurable confidence threshold. These correction files are structured for future model training and fine-tuning.
 
-## Key Learning Objectives
+## Objectives
 
 - Understand how LLM self-correction pipelines detect and capture low-quality responses using configurable confidence thresholds
 - Implement validation loops that compare generated outputs against ground-truth references to measure response quality
